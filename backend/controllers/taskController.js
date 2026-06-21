@@ -19,11 +19,22 @@ const addTask = async(req, res) => {
         }
         const newTask = new taskModel({title,status})
         await newTask.save()
-        res.status(200).json({success:true, message:'task saved'})
+        res.status(200).json({success:true, message:'task saved', newTask})
     } catch(error) {
         console.log(error)
         res.status(500).json({success:false, message:error.message})
     }
 }
 
-export {getTasks, addTask}
+const statusChange = async (req, res) => {
+    try {
+        const {id, status} = req.body
+        await taskModel.findByIdAndUpdate(id, {status: status})
+        res.status(200).json({success:true, message:'status updated'})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({success:false, message:error.message})
+    }
+}
+
+export {getTasks, addTask, statusChange}

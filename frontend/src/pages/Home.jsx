@@ -1,31 +1,34 @@
-import React from 'react'
 import Navbar from '../components/Navbar'
 import axios from 'axios'
 import Task from '../components/Task'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const Home = () => {
-  const [tasks, setTasks] = useState([])
+  const backendUrl = import.meta.env.VITE_BACKEND_URL
+
+const [tasks, setTasks] = useState([])
 const [showTask, setShowTask] = useState(false)
 
 const addTaskToDB = async (e) => {
   e.preventDefault()
   const title = e.target.title.value 
   const status = e.target.status.checked
-  console.log('env:', import.meta.env.VITE_BACKEND_URL)
   try {
-    const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/add', {title,status})
+    const response = await axios.post(backendUrl + '/add', {title,status})
     if(response.data.success) {
       console.log(response)
+      const newTask = response.data.newTask
+      setTasks(prev=> [newTask, ...prev])
     }
   } catch(error) {
     console.log(error)
   }
 }
 
+
 const fetchTaskFromDB = async () => {
   try {
-    const response = await axios.get(import.meta.env.VITE_BACKEND_URL + '/get')
+    const response = await axios.get(backendUrl + '/get')
     if (response.data.success) {
       setTasks(response.data.tasks)
     }
@@ -40,6 +43,21 @@ const handleShowTask = () => {
   }
   setShowTask(!showTask)
 }
+
+const handleStatusChange = async (id, status) => {
+  try {
+     const response = await axios.post(backendUrl + '/updateStatus', {id, status})
+     if (response.data.success) {
+      console.log(response.data.message)
+      setTasks(prev => prev.map(task => 
+        task._id === id ? {...task, status: status}: task
+      ))
+     }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
   return (
     <>
         <Navbar/>
@@ -56,7 +74,7 @@ const handleShowTask = () => {
     </p>
     {
       showTask && tasks.map((t) => (
-        <Task key={t._id} params={t}/>
+        <Task key={t._id} params={t} onStatusChange={handleStatusChange}/>
       ))
     }
    
