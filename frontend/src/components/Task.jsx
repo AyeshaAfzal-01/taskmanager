@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Task = ({params, onStatusChange}) => {
+const Task = ({params, onStatusChange, onEdit}) => {
 
   return (
     <div className='flex justify-between items-center text-lg w-1/2 m-auto mt-2'>
@@ -9,7 +9,7 @@ const Task = ({params, onStatusChange}) => {
         <input type="checkbox" checked={params.status} onChange={()=>onStatusChange(params._id, !params.status)} name="status" id="status" className='scale-200' />
         </div>
         <div className='flex justify-center items-center gap-6'>
-        <p className='text-blue-600 cursor-pointer hover:text-blue-400'>Edit</p>
+        <p  onClick={() => onEdit(params)} className='text-blue-600 cursor-pointer hover:text-blue-400'>Edit</p>
         <p className='text-red-600 cursor-pointer hover:text-red-400'>Delete</p>
         </div>
     </div>

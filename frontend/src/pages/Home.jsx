@@ -8,11 +8,14 @@ const Home = () => {
 
 const [tasks, setTasks] = useState([])
 const [showTask, setShowTask] = useState(false)
+const [title, setTitle] = useState(" ")
+const [editingTaskId, setEditingTaskId] = useState(null)
 
 const addTaskToDB = async (e) => {
   e.preventDefault()
   const title = e.target.title.value 
   const status = e.target.status.checked
+  if (editingTaskId === null) {
   try {
     const response = await axios.post(backendUrl + '/add', {title,status})
     if(response.data.success) {
@@ -23,6 +26,18 @@ const addTaskToDB = async (e) => {
   } catch(error) {
     console.log(error)
   }
+}
+else {
+  try {
+    const response = await axios.post(backendUrl + '/edit', {editingTaskId, title, status})
+    if (response.data.success) {
+      console.log(response)
+      setTasks(prev => prev.map(task => task._id === editingTaskId ? {...task, title} : task))
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
 }
 
 
@@ -58,12 +73,21 @@ const handleStatusChange = async (id, status) => {
   }
 }
 
+const handleEdit = async (params) => {
+  try {
+    setTitle(params.title)
+    setEditingTaskId(params._id)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
   return (
     <>
         <Navbar/>
     <form onSubmit={(e)=>{addTaskToDB(e)}} className='flex flex-col   gap-8 m-6 pt-12 justify-center items-center'>
       <div className='flex justify-center items-center gap-6 w-full'>
-      <input type="text" name='title' placeholder='Task title' className='border-2 border-gray-400 rounded-lg w-1/2 px-2 py-1 text-2xl font-semibold' required />
+      <input type="text" name='title' value={title} onChange={(e) => setTitle(e.target.value)} placeholder='Task title' className='border-2 border-gray-400 rounded-lg w-1/2 px-2 py-1 text-2xl font-semibold' required />
       <input type="checkbox" name="status" id="status" className='scale-200'/>
       </div>
         <button type="submit" className='bg-blue-600 px-2 py-2 text-2xl hover:bg-blue-400 text-white font-semibold rounded-lg w-40'>Add Task</button>
@@ -74,7 +98,7 @@ const handleStatusChange = async (id, status) => {
     </p>
     {
       showTask && tasks.map((t) => (
-        <Task key={t._id} params={t} onStatusChange={handleStatusChange}/>
+        <Task key={t._id} params={t} onStatusChange={handleStatusChange} onEdit={handleEdit}/>
       ))
     }
    

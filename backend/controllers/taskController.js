@@ -37,4 +37,15 @@ const statusChange = async (req, res) => {
     }
 }
 
-export {getTasks, addTask, statusChange}
+const editTask = async (req, res) => {
+    try {
+        const {editingTaskId, title, status}= req.body
+        await taskModel.findByIdAndUpdate(editingTaskId, {title: title})
+        res.status(200).json({success: true, message: 'edit successfull'})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({success:false, message:error.message})
+    }
+}
+
+export {getTasks, addTask, statusChange, editTask}
