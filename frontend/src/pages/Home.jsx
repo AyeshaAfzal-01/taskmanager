@@ -8,8 +8,9 @@ const Home = () => {
 
 const [tasks, setTasks] = useState([])
 const [showTask, setShowTask] = useState(false)
-const [title, setTitle] = useState(" ")
+const [title, setTitle] = useState("")
 const [editingTaskId, setEditingTaskId] = useState(null)
+const [status, setStatus] = useState(false)
 
 const addTaskToDB = async (e) => {
   e.preventDefault()
@@ -32,12 +33,15 @@ else {
     const response = await axios.post(backendUrl + '/edit', {editingTaskId, title, status})
     if (response.data.success) {
       console.log(response)
-      setTasks(prev => prev.map(task => task._id === editingTaskId ? {...task, title} : task))
+      setTasks(prev => prev.map(task => task._id === editingTaskId ? {...task, title,status} : task))
     }
   } catch (error) {
     console.log(error)
   }
 }
+ setTitle('')
+ setEditingTaskId(null)
+ setStatus(false)
 }
 
 
@@ -82,26 +86,42 @@ const handleEdit = async (params) => {
   }
 }
 
+
+const handleDelete = async (id) => {
+  try {
+    const response = await axios.post(backendUrl + '/delete', {id})
+    if (response.data.success) {
+      console.log(response)
+      setTasks(prev => prev.filter(task => task._id !== id))
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
   return (
     <>
         <Navbar/>
     <form onSubmit={(e)=>{addTaskToDB(e)}} className='flex flex-col   gap-8 m-6 pt-12 justify-center items-center'>
       <div className='flex justify-center items-center gap-6 w-full'>
       <input type="text" name='title' value={title} onChange={(e) => setTitle(e.target.value)} placeholder='Task title' className='border-2 border-gray-400 rounded-lg w-1/2 px-2 py-1 text-2xl font-semibold' required />
-      <input type="checkbox" name="status" id="status" className='scale-200'/>
+      <input type="checkbox" checked={status} onChange={(e) => setStatus(e.target.checked)} name="status" id="status" className='scale-200'/>
       </div>
         <button type="submit" className='bg-blue-600 px-2 py-2 text-2xl hover:bg-blue-400 text-white font-semibold rounded-lg w-40'>Add Task</button>
     </form>
 
+<div className='mb-6'>
     <p onClick={handleShowTask} className='text-red-600 font-semibold text-center hover:text-red-400 cursor-pointer'>
       {showTask ? 'Hide Tasks' : 'Show all Tasks'}
     </p>
     {
       showTask && tasks.map((t) => (
-        <Task key={t._id} params={t} onStatusChange={handleStatusChange} onEdit={handleEdit}/>
+      
+        <Task key={t._id} params={t} onStatusChange={handleStatusChange} onEdit={handleEdit} onDelete={handleDelete}/>
+      
       ))
     }
-   
+   </div>
     </>
   )
 }

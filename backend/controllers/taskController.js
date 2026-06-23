@@ -40,7 +40,7 @@ const statusChange = async (req, res) => {
 const editTask = async (req, res) => {
     try {
         const {editingTaskId, title, status}= req.body
-        await taskModel.findByIdAndUpdate(editingTaskId, {title: title})
+        await taskModel.findByIdAndUpdate(editingTaskId, {title: title, status: status})
         res.status(200).json({success: true, message: 'edit successfull'})
     } catch (error) {
         console.log(error)
@@ -48,4 +48,15 @@ const editTask = async (req, res) => {
     }
 }
 
-export {getTasks, addTask, statusChange, editTask}
+const deleteTask = async (req, res) => {
+    try {
+        const {id} = req.body
+        await taskModel.findByIdAndDelete(id)
+        res.status(200).json({success: true, message: 'task deleted'})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({success: false , message: error.message})
+    }
+}
+
+export {getTasks, addTask, statusChange, editTask, deleteTask}
